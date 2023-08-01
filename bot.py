@@ -36,7 +36,8 @@ def _telegram_file(client, message):
   global filename
   filename = os.path.basename(file_path)
   global mp3file
-  mp3file= os.path.splitext(filename)
+  temp = os.path.splitext(filename)
+  mp3file = f"{temp}.mp3"
   message.reply(
              text = CHOOSE_UR_LANG,
              reply_markup = InlineKeyboardMarkup(CHOOSE_UR_LANG_BUTTONS)
@@ -59,9 +60,10 @@ def callback_query(CLIENT,CallbackQuery):
   CallbackQuery.edit_message_text(
       
       "جار التضخيم"
-  )   
-  cmd(f'''ffmpeg -i "{file_path}" -filter:a volume={langtoken}dB "{mp3file}"''')
-  cmd(f'''ffmpeg -i "{file_path}" -i "{mp3file}" -c:v copy -map 0:v:0 -map 1:a:0 "{filename}"''')
+  ) 
+  cmd(f'''ffmpeg -i "{file_path}" -q:a 0 -map a ./downloads/"mod{mp3file}" -y''')
+  cmd(f'''ffmpeg -i ./downloads/"mod{mp3file}" -filter:a volume={langtoken}dB ./downloads/"{mp3file}"''')
+  cmd(f'''ffmpeg -i "{file_path}" -i ./downloads/"{mp3file}" -c:v copy -map 0:v:0 -map 1:a:0 "{filename}"''')
   with open(filename, 'rb') as f:
         bot.send_video(user_id, f)
   shutil.rmtree('./downloads/') 
