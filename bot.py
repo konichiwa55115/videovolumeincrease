@@ -25,7 +25,7 @@ CHOOSE_UR_LANG_BUTTONS = [
 def command1(bot,message):
     bot.send_message(message.chat.id, " السلام عليكم , أنا بوت تضخيم الصوتيات\n\n  لبقية البوتات هنا \n\n https://t.me/ibnAlQyyim/1120 ",disable_web_page_preview=True)
 
-@bot.on_message(filters.private & filters.incoming &  filters.audio | filters.voice  )
+@bot.on_message(filters.private & filters.incoming &  filters.video | filters.document  )
 def _telegram_file(client, message):
   
   global user_id
@@ -35,6 +35,8 @@ def _telegram_file(client, message):
   file_path = message.download(file_name="./downloads/")
   global filename
   filename = os.path.basename(file_path)
+  global mp3file
+  mp3file= os.path.splitext(filename)
   message.reply(
              text = CHOOSE_UR_LANG,
              reply_markup = InlineKeyboardMarkup(CHOOSE_UR_LANG_BUTTONS)
@@ -58,9 +60,10 @@ def callback_query(CLIENT,CallbackQuery):
       
       "جار التضخيم"
   )   
-  cmd(f'''ffmpeg -i "{file_path}" -filter:a volume={langtoken}dB "{filename}"''')
+  cmd(f'''ffmpeg -i "{file_path}" -filter:a volume={langtoken}dB "{mp3file}"''')
+  cmd(f'''ffmpeg -i "{file_path}" -i "{mp3file}" -c:v copy -map 0:v:0 -map 1:a:0 "{filename}"''')
   with open(filename, 'rb') as f:
-        bot.send_audio(user_id, f)
+        bot.send_video(user_id, f)
   shutil.rmtree('./downloads/') 
   cmd(f'''unlink "{filename}"''')
 
